@@ -105,7 +105,11 @@ async function run() {
       const result = await reviewsCollection.insertOne(body);
       res.send(result);
     });
-
+    //get review / testimonial
+    app.get("/reviews", async (req, res) => {
+      const result = await reviewsCollection.find().toArray();
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     console.log(

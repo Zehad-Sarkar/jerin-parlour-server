@@ -25,7 +25,8 @@ async function run() {
     // await client.connect();
 
     const userCollection = client.db("jerinsParlour").collection("users");
-    //create user in database 
+    const serviceCollection = client.db("jerinsParlour").collection("services");
+    //create user in database
     app.post("/user", async (req, res) => {
       const body = req.body;
       const query = { email: body?.email };
@@ -36,6 +37,54 @@ async function run() {
         }
       }
       const result = await userCollection.insertOne(body);
+      res.send(result);
+    });
+
+    //get user role from database
+    app.get("/users", async (req, res) => {
+      // const query = { email: req.email };
+      const result = await userCollection.find().toArray();
+      console.log(result);
+      res.send(result);
+    });
+
+    //google login user stored
+    app.post("/user", async (req, res) => {
+      const body = req.body;
+      const query = { email: body.email };
+      const existingUser = await userCollection.findOne(query);
+      if (existingUser) {
+        return res.send({ message: "user already exist" });
+      }
+      const result = await userCollection.insertOne(body);
+      res.send(result);
+    });
+
+    //makeAdmin route for admin role
+    app.patch("/makeAdmin/:email", async (req, res) => {
+      const email = { email: req.params.email };
+      const updateUser = {
+        $set: {
+          role: "admin",
+        },
+      };
+      const result = await userCollection.updateOne(email, updateUser);
+      if (result.modifiedCount === 1) {
+        return res.status(200).send({ message: "user role updated" });
+      } else {
+        return res.status(404).send({ message: "user not found" });
+      }
+    });
+
+    //added service stored on database
+    app.post("/addedService", async (req, res) => {
+      const body = req.body;
+      const result = await serviceCollection.insertOne(body);
+      res.send(result);
+    });
+    //get all services for manage a service in admin panel
+    app.get("/allServices", async (req, res) => {
+      const result = await serviceCollection.find().toArray();
       res.send(result);
     });
     // Send a ping to confirm a successful connection

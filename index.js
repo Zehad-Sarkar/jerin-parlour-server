@@ -7,7 +7,7 @@ const port = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DBUSER}:${process.env.DBPASS}@cluster0.7em2cfy.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -44,7 +44,6 @@ async function run() {
     app.get("/users", async (req, res) => {
       // const query = { email: req.email };
       const result = await userCollection.find().toArray();
-      console.log(result);
       res.send(result);
     });
 
@@ -85,6 +84,13 @@ async function run() {
     //get all services for manage a service in admin panel
     app.get("/allServices", async (req, res) => {
       const result = await serviceCollection.find().toArray();
+      res.send(result);
+    });
+    //delete a service by admin
+    app.delete("/serviceDelete/:id", async (req, res) => {
+      const result = await serviceCollection.deleteOne({
+        _id: new ObjectId(req.params.id),
+      });
       res.send(result);
     });
     // Send a ping to confirm a successful connection

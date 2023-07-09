@@ -26,6 +26,7 @@ async function run() {
 
     const userCollection = client.db("jerinsParlour").collection("users");
     const serviceCollection = client.db("jerinsParlour").collection("services");
+    const reviewsCollection = client.db("jerinsParlour").collection("reviews");
     //create user in database
     app.post("/user", async (req, res) => {
       const body = req.body;
@@ -42,9 +43,14 @@ async function run() {
 
     //get user role from database
     app.get("/users", async (req, res) => {
-      // const query = { email: req.email };
-      const result = await userCollection.find().toArray();
-      res.send(result);
+      const query = { email: req.query.email };
+      const user = await userCollection.findOne(query);
+      if (user) {
+        const { role } = user;
+        res.send({ role });
+      } else {
+        res.send({ role: null });
+      }
     });
 
     //google login user stored
@@ -93,6 +99,13 @@ async function run() {
       });
       res.send(result);
     });
+    //review stored on database
+    app.post("/reviews", async (req, res) => {
+      const body = req.body;
+      const result = await reviewsCollection.insertOne(body);
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     console.log(

@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const app = express();
+const nodemailer = require("nodemailer");
 const port = process.env.PORT || 4000;
 
 app.use(cors());
@@ -27,6 +28,9 @@ async function run() {
     const userCollection = client.db("jerinsParlour").collection("users");
     const serviceCollection = client.db("jerinsParlour").collection("services");
     const reviewsCollection = client.db("jerinsParlour").collection("reviews");
+    const bookingsCollection = client
+      .db("jerinsParlour")
+      .collection("bookings");
     //create user in database
     app.post("/user", async (req, res) => {
       const body = req.body;
@@ -108,6 +112,33 @@ async function run() {
     //get review / testimonial
     app.get("/reviews", async (req, res) => {
       const result = await reviewsCollection.find().toArray();
+      res.send(result);
+    });
+
+    //booking a product
+    app.post("/bookingProduct", async (req, res) => {
+      const body = req.body;
+      const result = await bookingsCollection.insertOne(body);
+      res.send(result);
+    });
+
+    //get booking to see the booking list
+    app.get("/bookingList", async (req, res) => {
+      const result = await bookingsCollection.find().toArray();
+      res.send(result);
+    });
+
+    //update booking list action button
+    app.patch("/bookingStatus/:id", async (req, res) => {
+      const body = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: body.status,
+        },
+      };
+      const result = await bookingsCollection.updateOne(query, updateDoc);
       res.send(result);
     });
     // Send a ping to confirm a successful connection
